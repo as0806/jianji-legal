@@ -3,43 +3,492 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>简记 - 简单纯粹的本地记账</title>
+<meta name="description" content="简记 JianJi —— 简单纯粹的本地记账应用。快速记账、资产管理、统计报表、预算管理、AI 自动记账、云备份，本地优先、无广告。">
+<title>简记 JianJi · 简单纯粹的本地记账</title>
 <style>
-:root{--bg:#fff;--ink:#1c1c1e;--muted:#555;--line:#e5e5ea;--accent:#0a84ff}
-@media (prefers-color-scheme:dark){:root{--bg:#111;--ink:#f2f2f7;--muted:#b0b0b8;--line:#2c2c2e;--accent:#409cff}}
-html,body{margin:0;background:var(--bg)}
-body{font:16px/1.9 -apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;color:var(--muted);padding:24px 20px 48px;max-width:680px;margin:0 auto}
-h1{font-size:26px;color:var(--ink);margin:16px 0 4px}
-h2{font-size:18px;color:var(--ink);margin:28px 0 8px}
-ul{padding-left:20px;margin:8px 0}
+:root{
+  --bg:#ffffff; --bg-soft:#f5f6f8; --card:#ffffff;
+  --ink:#16181d; --muted:#5b6470; --faint:#8a93a0;
+  --line:#e7e9ee; --accent:#0a7dff; --accent-ink:#ffffff;
+  --accent-2:#12b76a; --warm:#f59e0b; --danger:#d6001c;
+  --shadow:0 10px 30px rgba(18,38,74,.08);
+  --grad:linear-gradient(135deg,#0a7dff 0%,#22c1c3 100%);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0f1115; --bg-soft:#16181d; --card:#191c22;
+    --ink:#f2f4f8; --muted:#a6aeb9; --faint:#6d7683;
+    --line:#262a33; --accent:#409cff; --accent-ink:#04213f;
+    --shadow:0 12px 34px rgba(0,0,0,.5);
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{font:16px/1.85 -apple-system,"PingFang SC","Noto Sans SC","Microsoft YaHei",sans-serif;color:var(--muted);-webkit-font-smoothing:antialiased}
 a{color:var(--accent);text-decoration:none}
-.tag{color:var(--accent);font-size:14px}
-.hr{border:none;border-top:1px solid var(--line);margin:32px 0}
-footer{font-size:13px;color:var(--muted)}
+a:hover{text-decoration:underline}
+.wrap{max-width:1060px;margin:0 auto;padding:0 22px}
+section{padding:64px 0}
+
+/* 顶栏 */
+.nav{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 86%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;height:58px}
+.brand{font-size:18px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px}
+.brand .logo{width:26px;height:26px;border-radius:7px;background:var(--grad);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800}
+.nav-links{display:flex;gap:20px;font-size:14px}
+.nav-links a{color:var(--muted)}
+.nav-links a:hover{color:var(--ink);text-decoration:none}
+
+/* Hero */
+.hero{padding:72px 0 56px;text-align:center;position:relative;overflow:hidden}
+.hero .wrap{position:relative}
+.hero-badge{display:inline-block;font-size:13px;color:var(--accent);border:1px solid var(--line);background:var(--bg-soft);padding:5px 14px;border-radius:999px;margin-bottom:18px}
+h1{font-size:52px;line-height:1.12;color:var(--ink);margin:0 0 14px;letter-spacing:-.5px}
+h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{font-size:19px;color:var(--muted);max-width:600px;margin:0 auto 26px}
+.hero-cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:13px 26px;border-radius:12px;font-size:16px;font-weight:600;border:1px solid transparent;cursor:pointer;transition:.18s}
+.btn-primary{background:var(--grad);color:#fff;box-shadow:0 8px 22px rgba(10,125,255,.28)}
+.btn-primary:hover{transform:translateY(-1px);text-decoration:none}
+.btn-ghost{background:var(--card);color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.hero-stats{display:flex;gap:40px;justify-content:center;margin-top:44px;flex-wrap:wrap}
+.hstat{text-align:center}
+.hstat b{display:block;font-size:26px;color:var(--ink)}
+.hstat span{font-size:13px;color:var(--faint)}
+
+/* 标题 */
+.sec-head{text-align:center;margin-bottom:44px}
+.sec-head .kicker{font-size:13px;letter-spacing:2px;color:var(--accent);text-transform:uppercase}
+.sec-head h2{font-size:32px;color:var(--ink);margin:8px 0 10px}
+.sec-head p{max-width:640px;margin:0 auto;color:var(--muted)}
+
+/* 功能网格 */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;box-shadow:var(--shadow)}
+.card .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent)}
+.card h3{font-size:18px;color:var(--ink);margin:0 0 8px}
+.card p{font-size:14.5px;margin:0;color:var(--muted)}
+.card.tint-green .ic{background:color-mix(in srgb,var(--accent-2) 14%,transparent);color:var(--accent-2)}
+.card.tint-warm .ic{background:color-mix(in srgb,var(--warm) 15%,transparent);color:var(--warm)}
+
+/* AI 专区 */
+.ai{background:var(--bg-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ai .grid2{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.chat{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+.msg{display:flex;gap:10px;margin-bottom:14px;align-items:flex-start}
+.msg .ava{width:30px;height:30px;border-radius:9px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700}
+.msg.user{flex-direction:row-reverse}
+.msg.user .ava{background:var(--accent);color:#fff}
+.msg.ai .ava{background:var(--bg-soft);color:var(--accent)}
+.msg .bubble{background:var(--bg-soft);border-radius:14px;padding:10px 14px;font-size:14px;max-width:78%;color:var(--ink)}
+.msg.user .bubble{background:var(--accent);color:#fff}
+.msg.ai .bubble{background:var(--bg-soft);color:var(--ink)}
+.item-line{font-size:13px;color:var(--muted);background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:6px 0 0}
+.tag-pill{display:inline-block;font-size:12px;color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 12%,transparent);padding:2px 10px;border-radius:999px;margin-right:6px}
+.ai-points{list-style:none;padding:0;margin:20px 0 0}
+.ai-points li{display:flex;gap:12px;margin-bottom:14px;font-size:15px}
+.ai-points .dot{width:22px;height:22px;border-radius:7px;background:var(--grad);color:#fff;font-size:12px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-weight:700}
+
+/* 会员 */
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;align-items:stretch}
+.plan{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 24px;text-align:center;position:relative;box-shadow:var(--shadow)}
+.plan.hot{border-color:var(--accent);box-shadow:0 14px 40px rgba(10,125,255,.18)}
+.plan .hot-tag{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;font-size:12px;padding:3px 14px;border-radius:999px;font-weight:600}
+.plan h3{font-size:19px;color:var(--ink);margin:0 0 4px}
+.plan .dur{font-size:13px;color:var(--faint);margin-bottom:16px}
+.plan .price-note{font-size:15px;color:var(--muted);margin:14px 0}
+.plan ul{list-style:none;padding:0;margin:0 0 20px;text-align:left;font-size:14px}
+.plan ul li{padding:6px 0;display:flex;gap:8px;align-items:center}
+.plan ul li::before{content:"✓";color:var(--accent-2);font-weight:800}
+.plan .btn{width:100%;justify-content:center}
+.plan .btn-primary{background:var(--grad)}
+.plan .btn-ghost{background:var(--bg-soft)}
+.assure{display:flex;gap:28px;justify-content:center;margin-top:30px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.assure span{display:inline-flex;align-items:center;gap:7px}
+.assure svg{color:var(--accent-2)}
+
+/* 隐私 */
+.privacy-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.pcell{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;gap:16px;align-items:flex-start}
+.pcell .ic{font-size:24px;line-height:1}
+.pcell h4{margin:0 0 6px;color:var(--ink);font-size:16px}
+.pcell p{margin:0;font-size:14px;color:var(--muted)}
+
+/* FAQ */
+.faq{max-width:760px;margin:0 auto}
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:12px}
+summary{cursor:pointer;font-weight:600;color:var(--ink);font-size:16px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";font-size:22px;color:var(--faint);font-weight:400}
+details[open] summary::after{content:"−"}
+details p{margin:12px 0 0;font-size:14.5px;color:var(--muted)}
+
+/* 底部 */
+.cta-band{background:var(--grad);color:#fff;text-align:center;padding:60px 0;border-radius:0}
+.cta-band h2{color:#fff;font-size:30px;margin:0 0 12px}
+.cta-band p{color:rgba(255,255,255,.9);margin:0 0 26px}
+.cta-band .btn{background:#fff;color:#0a7dff}
+footer{border-top:1px solid var(--line);padding:34px 0;text-align:center;font-size:14px;color:var(--faint)}
+footer .links{display:flex;gap:22px;justify-content:center;margin-bottom:12px;flex-wrap:wrap}
+footer a{color:var(--muted)}
+
+@media (max-width:820px){
+  h1{font-size:38px}
+  .grid,.plans,.privacy-grid{grid-template-columns:1fr}
+  .ai .grid2{grid-template-columns:1fr}
+  .hero{padding:52px 0 40px}
+  section{padding:48px 0}
+}
+
+/* JianJi visual system: aligned with the Android app */
+:root{
+  color-scheme:light;
+  --bg:#f4f7ff;--bg-soft:rgba(255,255,255,.48);--card:rgba(255,255,255,.72);
+  --ink:#20232b;--muted:#69717e;--faint:#929aa6;--line:rgba(255,255,255,.88);
+  --accent:#6889b8;--accent-ink:#fff;--accent-2:#20a77c;--warm:#d6a36d;--danger:#d66d68;
+  --shadow:0 16px 42px rgba(71,88,119,.09),0 2px 8px rgba(71,88,119,.035);
+  --grad:linear-gradient(135deg,#718fb9 0%,#9eb4d1 100%);
+  --glass:linear-gradient(145deg,rgba(255,255,255,.88),rgba(255,255,255,.52));
+}
+@media(prefers-color-scheme:dark){
+ :root{color-scheme:dark;--bg:#171a20;--bg-soft:rgba(35,39,47,.72);--card:rgba(42,47,57,.78);--ink:#f2f3f6;--muted:#b0b7c2;--faint:#858e9b;--line:rgba(255,255,255,.10);--accent:#9ab5dc;--accent-ink:#17202d;--accent-2:#6ac7a4;--warm:#d6ad83;--danger:#e28a83;--shadow:0 18px 48px rgba(0,0,0,.25);--grad:linear-gradient(135deg,#7798c5,#9ab5dc);--glass:linear-gradient(145deg,rgba(59,66,79,.92),rgba(37,42,51,.82))}
+}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{background:radial-gradient(ellipse at 8% 8%,rgba(184,199,218,.42),transparent 34%),radial-gradient(ellipse at 92% 35%,rgba(255,224,190,.32),transparent 30%),linear-gradient(155deg,#f4f7ff 0%,#fbf9f7 52%,#fffaF3 100%);background-attachment:fixed;color:var(--muted);font-size:15px;line-height:1.8}
+@media(prefers-color-scheme:dark){body{background:radial-gradient(ellipse at 8% 8%,rgba(79,101,139,.18),transparent 36%),radial-gradient(ellipse at 92% 35%,rgba(142,105,76,.12),transparent 32%),#171a20}}
+.wrap{width:min(1160px,calc(100% - 48px));padding:0;margin:0 auto}
+section{padding:92px 0;position:relative}
+.nav{background:rgba(248,250,255,.72);border:0;border-bottom:1px solid rgba(255,255,255,.82);box-shadow:0 5px 24px rgba(66,82,110,.045)}
+@media(prefers-color-scheme:dark){.nav{background:rgba(25,29,36,.78);border-bottom-color:var(--line)}}
+.nav .wrap{height:72px;gap:24px}
+.brand{font-size:20px;letter-spacing:.2px;gap:10px;white-space:nowrap}
+.brand .logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,#7896bd,#a9bdd8);box-shadow:0 5px 12px rgba(100,130,174,.22);font-size:16px}
+.nav-links{gap:clamp(14px,2.2vw,28px);font-size:14px;align-items:center}
+.nav-links a{padding:8px 0;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-toggle{display:none;border:1px solid var(--line);background:var(--card);width:44px;height:44px;border-radius:14px;padding:11px;cursor:pointer}
+.nav-toggle span{display:block;height:2px;background:var(--ink);border-radius:4px;margin:4px 0;transition:transform .2s,opacity .2s}
+.hero{padding:112px 0 92px;text-align:center;overflow:hidden}
+.hero:before{content:"";position:absolute;width:560px;height:420px;left:50%;top:10px;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(255,255,255,.82),rgba(255,255,255,0));pointer-events:none}
+.hero .wrap{z-index:1}
+.hero-badge{font-size:13px;letter-spacing:.4px;color:#637fa5;border:1px solid rgba(255,255,255,.9);background:rgba(255,255,255,.58);padding:7px 16px;border-radius:999px;margin-bottom:25px;box-shadow:0 5px 18px rgba(74,98,132,.06)}
+h1{font-size:clamp(42px,6vw,68px);line-height:1.13;letter-spacing:-1.8px;margin:0 0 22px;font-weight:800}
+h1 .grad{background:linear-gradient(110deg,#6c88b0 10%,#91a9c8 55%,#c6a27f 100%);-webkit-background-clip:text;background-clip:text}
+.hero-sub{font-size:17px;line-height:1.9;max-width:660px;margin:0 auto 32px}
+.hero-cta{gap:12px}
+.btn{min-height:50px;padding:13px 25px;border-radius:15px;font-size:15px;transition:transform .2s,box-shadow .2s,border-color .2s}
+.btn-primary{background:linear-gradient(135deg,#718fb9,#9bb1cf);box-shadow:0 9px 22px rgba(103,133,177,.22)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 13px 26px rgba(103,133,177,.28)}
+.btn-ghost{background:rgba(255,255,255,.62);border-color:rgba(255,255,255,.95);box-shadow:0 5px 18px rgba(66,82,110,.045)}
+.btn-ghost:hover{border-color:rgba(117,146,186,.5);color:var(--accent)}
+.hero-stats{gap:0;max-width:760px;margin:54px auto 0;padding:20px 8px;border-radius:22px;background:rgba(255,255,255,.48);border:1px solid rgba(255,255,255,.82);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.hstat{flex:1;min-width:130px;padding:4px 16px}.hstat+.hstat{border-left:1px solid rgba(126,140,160,.13)}
+.hstat b{font-size:23px;letter-spacing:-.5px}.hstat span{font-size:12px}
+.sec-head{margin-bottom:42px}.sec-head .kicker{font-size:11px;font-weight:750;letter-spacing:2.5px;color:#7893b7}
+.sec-head h2{font-size:clamp(25px,3.4vw,36px);letter-spacing:-.7px;margin:8px 0 12px;font-weight:750}
+.sec-head p{font-size:15px;line-height:1.85;max-width:650px}
+.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.card,.plan,.chat,.pcell,details{background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.card{border-radius:22px;padding:27px 26px;transition:transform .22s,box-shadow .22s}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 46px rgba(71,88,119,.13)}
+.card .ic{width:48px;height:48px;border-radius:16px;background:rgba(119,151,194,.13);color:#6d89b1;margin-bottom:20px}
+.card.tint-green .ic{background:rgba(32,167,124,.12);color:#209c77}.card.tint-warm .ic{background:rgba(214,163,109,.16);color:#bd8d5c}
+.card h3{font-size:17px;margin-bottom:7px}.card p{font-size:14px;line-height:1.8}
+.ai{background:rgba(255,255,255,.24);border-top:1px solid rgba(255,255,255,.6);border-bottom:1px solid rgba(255,255,255,.6)}
+.ai .grid2{gap:clamp(34px,6vw,76px)}
+.ai .sec-head h2{max-width:470px}.ai-points{margin-top:25px}.ai-points li{font-size:14px;line-height:1.8;gap:13px;margin-bottom:17px}
+.ai-points .dot{width:25px;height:25px;border-radius:9px;background:linear-gradient(145deg,#7896bd,#a9bdd8);box-shadow:0 4px 10px rgba(103,133,177,.18)}
+.chat{border-radius:24px;padding:25px;background:rgba(255,255,255,.65)}
+.msg{gap:11px;margin-bottom:17px}.msg .ava{width:34px;height:34px;border-radius:12px;font-size:12px}
+.msg .bubble{border-radius:16px;padding:11px 15px;font-size:13px;line-height:1.7}
+.msg.user .ava,.msg.user .bubble{background:linear-gradient(135deg,#718fb9,#91a9c8);color:#fff}
+.msg.ai .ava{background:rgba(119,151,194,.14);color:#6d89b1}.msg.ai .bubble{background:rgba(239,243,249,.86)}
+.item-line{border:1px solid rgba(124,147,179,.12);border-radius:12px;padding:9px 11px}
+.plans{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.plan{border-radius:24px;padding:32px 25px;text-align:left;display:flex;flex-direction:column}
+.plan.hot{border-color:rgba(119,151,194,.55);box-shadow:0 18px 48px rgba(103,133,177,.15);background:linear-gradient(150deg,rgba(255,255,255,.94),rgba(238,244,252,.78))}
+@media(prefers-color-scheme:dark){.plan.hot{background:var(--glass)}}
+.plan .hot-tag{top:17px;left:auto;right:18px;transform:none;background:rgba(119,151,194,.14);color:#6d89b1;padding:5px 11px}
+.plan h3{font-size:19px}.plan .dur{margin-bottom:22px}.plan ul{font-size:14px;flex:1}.plan ul li{padding:8px 0}.plan .price-note{font-size:13px;margin:14px 0 18px}.plan .btn{width:100%;justify-content:center}
+.plan .btn-primary{background:linear-gradient(135deg,#718fb9,#9bb1cf)}.plan .btn-ghost{background:rgba(255,255,255,.55)}
+.assure{gap:14px 28px;margin-top:28px;font-size:13px}.assure span{gap:8px}
+#privacy{background:rgba(255,255,255,.24)!important;border-color:rgba(255,255,255,.6)!important}
+.privacy-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.pcell{border-radius:20px;padding:23px;gap:15px}.pcell .ic{width:42px;height:42px;flex:0 0 42px;border-radius:14px;background:rgba(119,151,194,.12);display:flex;align-items:center;justify-content:center;font-size:0}
+.pcell .ic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.pcell h4{font-size:15px}.pcell p{font-size:13px;line-height:1.8}
+.faq{max-width:800px}details{border-radius:17px;padding:17px 21px;margin-bottom:12px}summary{font-size:14px;gap:16px}summary::after{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(119,151,194,.11);font-size:19px;flex:0 0 auto}details p{font-size:13.5px;line-height:1.85}
+.cta-band{background:radial-gradient(ellipse at 15% 0%,rgba(255,255,255,.22),transparent 42%),linear-gradient(120deg,#7189aa,#8da7c8 60%,#b6b9c1);padding:72px 0!important}
+.cta-band h2{font-size:clamp(26px,3.5vw,36px)}.cta-band p{font-size:15px}.cta-band .btn{color:#627eA5;border-radius:15px;box-shadow:0 8px 22px rgba(45,64,92,.12)}
+footer{border-color:rgba(133,148,170,.18);padding:34px 0 40px;font-size:13px}footer .links{gap:24px;margin-bottom:15px}
+:focus-visible{outline:3px solid rgba(104,137,184,.45);outline-offset:3px}
+@media(max-width:900px){
+ .wrap{width:min(100% - 40px,720px)}section{padding:72px 0}.hero{padding:88px 0 70px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr))}.plans{gap:14px}.plan{padding:27px 19px}
+ .nav .wrap{height:66px}.nav-toggle{display:block;margin-left:auto}
+ .nav-links{display:none;position:absolute;top:calc(100% + 8px);left:20px;right:20px;padding:10px;background:rgba(250,252,255,.94);border:1px solid rgba(255,255,255,.95);border-radius:18px;box-shadow:0 18px 42px rgba(52,69,99,.14);backdrop-filter:blur(20px);flex-direction:column;align-items:stretch;gap:2px}
+ @media(prefers-color-scheme:dark){.nav-links{background:rgba(35,40,49,.96);border-color:var(--line)}}
+ .nav-links.open{display:flex}.nav-links a{padding:11px 14px;border-radius:10px}.nav-links a:hover{background:rgba(119,151,194,.10)}
+}
+@media(max-width:620px){
+ .wrap{width:calc(100% - 36px)}section{padding:60px 0}.hero{padding:72px 0 56px}
+ h1{font-size:clamp(38px,11vw,48px);letter-spacing:-1.2px}.hero-sub{font-size:14px;line-height:1.9}.hero-badge{font-size:11px;padding:6px 12px}
+ .hero-cta{display:grid;grid-template-columns:1fr;max-width:320px;margin:auto;gap:10px}.btn{width:100%;justify-content:center;min-height:50px}
+ .hero-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;margin-top:38px;padding:12px 6px;border-radius:19px}
+ .hstat{min-width:0;padding:12px 6px}.hstat+.hstat{border-left:0}.hstat:nth-child(even){border-left:1px solid rgba(126,140,160,.13)}.hstat:nth-child(n+3){border-top:1px solid rgba(126,140,160,.13)}.hstat b{font-size:20px}.hstat span{font-size:11px}
+ .sec-head{margin-bottom:30px}.sec-head h2{font-size:26px}.sec-head p{font-size:13px}
+ .grid,.plans,.privacy-grid,.ai .grid2{grid-template-columns:1fr;gap:14px}.card{padding:23px;border-radius:19px}.card .ic{margin-bottom:15px}
+ .ai .grid2{gap:28px}.ai .sec-head{margin-bottom:14px}.chat{padding:17px;border-radius:20px}.msg .bubble{max-width:84%;font-size:12px}
+ .plan{padding:26px 22px;border-radius:21px}.plan.hot{order:-1}.plan .hot-tag{top:18px;right:17px}
+ .assure{display:grid;gap:10px;justify-content:start;margin-top:22px}.pcell{padding:19px;border-radius:18px}
+ details{padding:15px 16px;border-radius:15px}summary{font-size:13px}details p{font-size:12.5px}
+ .cta-band{padding:54px 0!important}.cta-band h2{font-size:27px}.cta-band p{font-size:13px}
+ footer .links{gap:14px 20px}
+}
+@media(max-width:360px){.wrap{width:calc(100% - 28px)}.hero-stats{margin-left:0;margin-right:0}.hstat b{font-size:18px}.card{padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
-<h1>简记</h1>
-<div class="tag">简单纯粹的本地记账 · 7 天免费试用 · 会员制（月 / 年 / 永久）</div>
 
-<h2>核心功能</h2>
-<ul>
-<li>快速记账：收入 / 支出 / 转账，支持分类、账户、日期与备注</li>
-<li>资产管理：资金账户、信贷账户与账户内细分资产</li>
-<li>统计报表：环形占比、趋势、分类排行</li>
-<li>预算管理：分类预算 + 月度总预算自动合计</li>
-<li>AI 自动记账：一句话或一张截图，自动识别并记账</li>
-<li>报销提醒：到点自动提醒，不再漏记</li>
-<li>数据自由：Excel 导出 / 导入、邮箱备份、云备份（可选）</li>
-<li>安全锁：数字 / 图案 / 指纹解锁</li>
-<li>桌面卡片：一眼看到本月收支</li>
-</ul>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="logo">简</span>简记</a>
+    <button class="nav-toggle" type="button" aria-label="打开导航菜单" aria-expanded="false" aria-controls="site-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="site-menu">
+      <a href="#features">功能</a>
+      <a href="#ai">AI 记账</a>
+      <a href="#plans">会员</a>
+      <a href="#privacy">隐私</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+  </div>
+</header>
 
-<h2>隐私承诺</h2>
-<p>账本数据默认只存在你的手机本地；不接入任何统计 / 广告 SDK；不收集位置、通讯录、设备硬件标识。AI 记账与支付会涉及必要的数据传输（详见隐私政策）。</p>
+<!-- Hero -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <span class="hero-badge">本地优先 · 无广告 · 无统计 SDK</span>
+    <h1>简单纯粹的<br><span class="grad">本地记账</span></h1>
+    <p class="hero-sub">简记 JianJi 是一款专注个人收支的记账应用。账本默认只存你手机本地，界面清爽、上手即用；再配上 AI 自动记账与云备份，让每一笔都记得轻松。</p>
+    <div class="hero-cta">
+      <!-- TODO: 把 href 换成真实下载地址（应用商店 / 直链） -->
+      <a class="btn btn-primary" href="#">下载简记</a>
+      <a class="btn btn-ghost" href="privacy.html">查看隐私政策</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><b>7 天</b><span>免费试用</span></div>
+      <div class="hstat"><b>本地优先</b><span>数据不自动上传</span></div>
+      <div class="hstat"><b>0 广告</b><span>无统计 / 广告 SDK</span></div>
+      <div class="hstat"><b>3 档会员</b><span>月 · 年 · 永久</span></div>
+    </div>
+  </div>
+</section>
 
-<hr class="hr">
-<p><a href="terms.html">用户协议</a> · <a href="privacy.html">隐私政策</a></p>
-<footer>© 2026 简记 · 最近更新于 2026 年 11 月 24 日</footer>
+<!-- 功能 -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Features</div>
+      <h2>把记账这件小事，做得顺手</h2>
+      <p>从记一笔到看懂钱花到哪了，核心功能一应俱全。</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <h3>快速记账</h3>
+        <p>收入、支出、转账一键记录，支持分类、账户、日期与备注，几秒钟记完一笔。</p>
+      </div>
+      <div class="card tint-green">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+        <h3>资产管理</h3>
+        <p>资金账户、信贷账户、账户内细分资产一图看清，余额自动回写、统一调账。</p>
+      </div>
+      <div class="card tint-warm">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 13l3-4 3 3 4-6"/></svg></div>
+        <h3>统计报表</h3>
+        <p>环形占比、收支趋势、分类排行，按天 / 月 / 自定义周期查看，钱花到哪一目了然。</p>
+      </div>
+      <div class="card">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20a8 8 0 1 0-8-8"/><path d="M12 20a8 8 0 0 1-8-8"/><path d="M12 12V4"/></svg></div>
+        <h3>预算管理</h3>
+        <p>分类预算 + 月度总预算，进度环实时提示，超支一眼预警。</p>
+      </div>
+      <div class="card tint-warm">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></div>
+        <h3>桌面卡片</h3>
+        <p>2×2 / 4×1 / 4×2 三种桌面小组件，不上锁屏也能一眼看到本月收支。</p>
+      </div>
+      <div class="card tint-green">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h3>安全锁</h3>
+        <p>数字密码、图案密码、指纹 / 面部解锁，账本内容只属于你。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI 记账 -->
+<section class="ai" id="ai">
+  <div class="wrap">
+    <div class="grid2">
+      <div>
+        <div class="sec-head" style="text-align:left;margin-bottom:20px">
+          <div class="kicker">AI 自动记账</div>
+          <h2>一句话，一张截图，账就记好了</h2>
+        </div>
+        <ul class="ai-points">
+          <li><span class="dot">1</span><span><b style="color:var(--ink)">截图识别</b>：发一张微信 / 支付宝付款截图，AI 自动识别金额、商户与收支方向。</span></li>
+          <li><span class="dot">2</span><span><b style="color:var(--ink)">表格分析</b>：上传 Excel / CSV 账单，AI 帮你分析收支结构与趋势。</span></li>
+          <li><span class="dot">3</span><span><b style="color:var(--ink)">多轮对话</b>：像聊天一样记，AI 记住上下文，识别到账目后一键批量写入账本。</span></li>
+        </ul>
+        <p style="font-size:13px;color:var(--faint);margin-top:20px">AI 记账会把相关内容转发给第三方大模型处理，使用前请阅读<a href="privacy.html">隐私政策</a>。</p>
+      </div>
+      <div class="chat">
+        <div class="msg user"><div class="ava">我</div><div class="bubble">中午和同事吃火锅 128，我请客</div></div>
+        <div class="msg ai"><div class="ava">AI</div><div class="bubble">已识别为一笔支出，请确认：<div class="item-line"><span class="tag-pill">支出</span>餐饮 · ¥128.00 · 今日 12:00</div></div></div>
+        <div class="msg user"><div class="ava">我</div><div class="bubble">对，记到支付宝</div></div>
+        <div class="msg ai"><div class="ava">AI</div><div class="bubble">已记入账本 ✅ 本笔记入「支付宝」账户。</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 会员 -->
+<section id="plans">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Membership</div>
+      <h2>免费试用 7 天，按需选会员</h2>
+      <p>新设备首次启动即享 7 天完整试用；试用结束按需购买，均为一次性付费、无自动续费。</p>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <h3>月度会员</h3>
+        <div class="dur">31 天高级功能</div>
+        <ul>
+          <li>解锁全部高级功能</li>
+          <li>AI 自动记账不限量</li>
+          <li>云备份与多设备同步</li>
+        </ul>
+        <div class="price-note">价格以应用内为准</div>
+        <a class="btn btn-ghost" href="#">下载后购买</a>
+      </div>
+      <div class="plan hot">
+        <span class="hot-tag">最划算</span>
+        <h3>年度会员</h3>
+        <div class="dur">366 天高级功能</div>
+        <ul>
+          <li>解锁全部高级功能</li>
+          <li>AI 自动记账不限量</li>
+          <li>云备份与多设备同步</li>
+          <li>支持限时折扣</li>
+        </ul>
+        <div class="price-note">价格以应用内为准</div>
+        <a class="btn btn-primary" href="#">下载后购买</a>
+      </div>
+      <div class="plan">
+        <h3>永久会员</h3>
+        <div class="dur">一次买断 · 终身使用</div>
+        <ul>
+          <li>解锁全部高级功能</li>
+          <li>AI 自动记账不限量</li>
+          <li>云备份与多设备同步</li>
+          <li>无到期、无需续费</li>
+        </ul>
+        <div class="price-note">价格以应用内为准</div>
+        <a class="btn btn-ghost" href="#">下载后购买</a>
+      </div>
+    </div>
+    <div class="assure">
+      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>支付宝 APP 支付，付款即自动激活</span>
+      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>7 天无理由退款</span>
+      <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>无自动续费、无订阅扣费</span>
+    </div>
+  </div>
+</section>
+
+<!-- 隐私 -->
+<section id="privacy" style="background:var(--bg-soft);border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">Privacy &amp; Security</div>
+      <h2>你的账本，只属于你</h2>
+      <p>本地优先，把隐私写进设计里。</p>
+    </div>
+    <div class="privacy-grid">
+      <div class="pcell"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4"/></svg></div><div><h4>本地优先</h4><p>账本数据默认只存你手机本地，不自动上传；导出、邮箱备份、云备份都由你主动发起。</p></div></div>
+      <div class="pcell"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"/><path d="M4.5 4.5l15 15M9 9a4.2 4.2 0 0 0 6 6"/></svg></div><div><h4>不收集敏感信息</h4><p>不采集位置、通讯录、短信、设备硬件标识；未接入任何统计 / 广告 / 推送 SDK。</p></div></div>
+      <div class="pcell"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></svg></div><div><h4>凭据加密</h4><p>应用锁密码加盐哈希存储；云账号 Token、SMTP 授权码等机密用系统级加密；设备标识只上传哈希。</p></div></div>
+      <div class="pcell"><div class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13l5 5L20 7"/><path d="M4 5h5M4 9h3"/></svg></div><div><h4>可删可控</h4><p>随时导出 Excel、清除本地数据、注销账号硬删除云端备份；权限可随时关闭。</p></div></div>
+    </div>
+    <p style="text-align:center;margin-top:30px;font-size:14px;color:var(--faint)">AI 记账与支付涉及必要的数据传输，详见 <a href="privacy.html">隐私政策</a> 与 <a href="terms.html">用户协议</a>。</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">FAQ</div>
+      <h2>常见问题</h2>
+    </div>
+    <div class="faq">
+      <details><summary>试用期有多久？</summary><p>新设备首次启动起可免费试用 7 天，试用期内完整功能开放（含 AI 自动记账）。</p></details>
+      <details><summary>怎么购买会员？</summary><p>在「我的 → 高级版」登录云账号后，选择月 / 年 / 永久任一档，用支付宝 APP 支付。付款成功后会员自动激活，无需提交订单号或等待审核。</p></details>
+      <details><summary>会员会自动续费吗？</summary><p>不会。所有档位均为一次性付费，无任何自动续费或订阅扣费；到期后需手动续费。</p></details>
+      <details><summary>可以退款吗？</summary><p>可以。自支付成功（会员激活）起 7 天内可申请无理由退款；支付宝 APP 支付订单将原路退回，退款成功后会员随即失效。</p></details>
+      <details><summary>换手机了，会员和数据还在吗？</summary><p>会员跟随云账号：在新设备登录同一账号即可恢复会员；账本数据可通过云备份或 Excel 备份迁移。</p></details>
+      <details><summary>账本数据存在哪里？安全吗？</summary><p>默认存本机私有目录，不自动上传。你主动开启云备份后，数据以 gzip + Base64 加密通道上传到你账号名下，仅你可见。本地账本未做额外文件加密，请妥善保管设备锁屏。</p></details>
+      <details><summary>AI 记账会泄露我的隐私吗？</summary><p>AI 记账会把文字、截图、表格等主动提交内容转发给第三方大模型处理，服务器不长期留存。请阅读<a href="privacy.html">隐私政策</a>了解细节。</p></details>
+      <details><summary>忘记应用锁密码怎么办？</summary><p>可通过「忘记密码」向预留邮箱发送验证码重置应用锁；请确保预留邮箱由你本人可控。</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-band" style="padding:60px 0">
+  <div class="wrap">
+    <h2>开始轻松记账</h2>
+    <p>免费试用 7 天，本地优先，无广告。</p>
+    <a class="btn" href="#">下载简记</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="links">
+      <a href="terms.html">用户协议</a>
+      <a href="privacy.html">隐私政策</a>
+      <a href="mailto:jianjibeifen@qq.com">联系开发者</a>
+    </div>
+    <div>© 2026 简记 JianJi · 最近更新于 2026 年 11 月 24 日</div>
+  </div>
+</footer>
+
+
+<script>
+(() => {
+  const toggle = document.querySelector('.nav-toggle');
+  const menu = document.querySelector('#site-menu');
+  if (!toggle || !menu) return;
+  const closeMenu = () => {
+    menu.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-label', '打开导航菜单');
+  };
+  toggle.addEventListener('click', () => {
+    const opened = menu.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(opened));
+    toggle.setAttribute('aria-label', opened ? '关闭导航菜单' : '打开导航菜单');
+  });
+  menu.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+  window.addEventListener('resize', () => { if (window.innerWidth > 900) closeMenu(); });
+})();
+</script>
 </body>
 </html>
